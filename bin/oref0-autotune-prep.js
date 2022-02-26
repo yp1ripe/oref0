@@ -27,7 +27,7 @@ var moment = require('moment');
 if (!module.parent) {
 
     var argv = require('yargs')
-        .usage("$0 <pumphistory.json> <profile.json> <glucose.json> <pumpprofile.json> [<carbhistory.json>] [--categorize_uam_as_basal] [--tune-insulin-curve] [--output-file=<output_file.json>]")
+        .usage("$0 <pumphistory.json> <profile.json> <glucose.json> <pumpprofile.json> [<carbhistory.json>] [--categorize_uam_as_basal] [--tune-insulin-curve] [--split-large-meals] [--output-file=<output_file.json>]")
         .option('categorize_uam_as_basal', {
             alias: 'u',
             boolean: true,
@@ -39,6 +39,12 @@ if (!module.parent) {
             boolean: true,
             describe: "Tune peak time and end time",
             default: false
+        })
+        .option('split-large-meals', {
+            alias: 'p',
+            boolean: true,
+            describe: 'Split large meals',
+            default: true,
         })
         .option('output-file', {
             alias: 'o',
@@ -130,6 +136,7 @@ if (!module.parent) {
     , glucose: glucose_data
     , categorize_uam_as_basal: params.categorize_uam_as_basal
     , tune_insulin_curve: params['tune-insulin-curve']
+    , split_large_meals: params['split-large-meals']
     };
 
     var prepped_glucose = generate(inputs);

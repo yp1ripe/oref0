@@ -49,6 +49,7 @@ END_DAYS_AGO=1  # Default to yesterday if not otherwise specified
 EXPORT_EXCEL="" # Default is to not export to Microsoft Excel
 TERMINAL_LOGGING=true
 CATEGORIZE_UAM_AS_BASAL=false
+SPLIT_LARGE_MEALS=true
 TUNE_INSULIN_CURVE=false
 RECOMMENDS_REPORT=true
 UNKNOWN_OPTION=""
@@ -117,6 +118,10 @@ case $i in
     ;;
     -c=*|--categorize-uam-as-basal=*)
     CATEGORIZE_UAM_AS_BASAL="${i#*=}"
+    shift
+    ;;
+    -p=*|--split-large-meals=*)
+    SPLIT_LARGE_MEALS="${i#*=}"
     shift
     ;;
     -i=*|--tune-insulin-curve=*)
@@ -235,8 +240,13 @@ do
         TUNE_INSULIN_CURVE_OPT=
     fi
 
-    echo "oref0-autotune-prep $CATEGORIZE_UAM_AS_BASAL_OPT $TUNE_INSULIN_CURVE_OPT ns-treatments.$i.json profile.json ns-entries.$i.json profile.pump.json > autotune.$i.json"
-    oref0-autotune-prep $CATEGORIZE_UAM_AS_BASAL_OPT $TUNE_INSULIN_CURVE_OPT ns-treatments.$i.json profile.json ns-entries.$i.json profile.pump.json > autotune.$i.json \
+    if [[ $SPLIT_LARGE_MEALS = "true" ]]; then
+        SPLIT_LARGE_MEALS_OPT=""
+    else
+        SPLIT_LARGE_MEALS_OPT="--split-large-meals=false"
+    fi
+    echo "oref0-autotune-prep $CATEGORIZE_UAM_AS_BASAL_OPT $TUNE_INSULIN_CURVE_OPT $SPLIT_LARGE_MEALS_OPT ns-treatments.$i.json profile.json ns-entries.$i.json profile.pump.json > autotune.$i.json"
+    oref0-autotune-prep $CATEGORIZE_UAM_AS_BASAL_OPT $TUNE_INSULIN_CURVE_OPT $SPLIT_LARGE_MEALS_OPT ns-treatments.$i.json profile.json ns-entries.$i.json profile.pump.json > autotune.$i.json \
         || die "Could not run oref0-autotune-prep ns-treatments.$i.json profile.json ns-entries.$i.json"
     
     # Autotune  (required args, <autotune/glucose.json> <autotune/autotune.json> <settings/profile.json>), 
