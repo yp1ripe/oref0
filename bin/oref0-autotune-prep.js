@@ -27,7 +27,7 @@ var moment = require('moment');
 if (!module.parent) {
 
     var argv = require('yargs')
-        .usage("$0 <pumphistory.json> <profile.json> <glucose.json> <pumpprofile.json> [<carbhistory.json>] [--categorize_uam_as_basal] [--tune-insulin-curve] [--split-large-meals] [--output-file=<output_file.json>]")
+        .usage("$0 <pumphistory.json> <profile.json> <glucose.json> <pumpprofile.json> [<carbhistory.json>] [--categorize_uam_as_basal] [--tune-insulin-curve] [--split-large-meals] [--end-meal-if-avgdev-le][--output-file=<output_file.json>]")
         .option('categorize_uam_as_basal', {
             alias: 'u',
             boolean: true,
@@ -45,6 +45,12 @@ if (!module.parent) {
             boolean: true,
             describe: 'Split large meals',
             default: true,
+        })
+        .option('end-meal-if-avgdev-le', {
+            alias: 'm',
+            boolean: false,
+            describe: 'End meal absorption if avgdev less or equivalent than, default 0.0',
+            default: '0.0',
         })
         .option('output-file', {
             alias: 'o',
@@ -137,6 +143,7 @@ if (!module.parent) {
     , categorize_uam_as_basal: params.categorize_uam_as_basal
     , tune_insulin_curve: params['tune-insulin-curve']
     , split_large_meals: params['split-large-meals']
+    , end_meal_if_avgdev_le: params['end-meal-if-avgdev-le']
     };
 
     var prepped_glucose = generate(inputs);

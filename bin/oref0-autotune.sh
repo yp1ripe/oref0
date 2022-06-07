@@ -50,6 +50,7 @@ EXPORT_EXCEL="" # Default is to not export to Microsoft Excel
 TERMINAL_LOGGING=true
 CATEGORIZE_UAM_AS_BASAL=false
 SPLIT_LARGE_MEALS=true
+LIMIT_AVGDEV=0.0
 TUNE_INSULIN_CURVE=false
 RECOMMENDS_REPORT=true
 UNKNOWN_OPTION=""
@@ -122,6 +123,10 @@ case $i in
     ;;
     -p=*|--split-large-meals=*)
     SPLIT_LARGE_MEALS="${i#*=}"
+    shift
+    ;;
+    -m=*|--end-meal-if-avgdev-le=*)
+    LIMIT_AVGDEV="${i#*=}"
     shift
     ;;
     -i=*|--tune-insulin-curve=*)
@@ -218,7 +223,7 @@ do
     #query="find%5Bdate%5D%5B%24gte%5D=$(to_epochtime $i |nonl; echo 000)&find%5Bdate%5D%5B%24lte%5D=$(to_epochtime "$i +1 days" |nonl; echo 000)&count=1000"
     # to capture UTC-dated treatments, we need to capture an extra 12h on either side, plus the DIA lookback
     # 18h = 12h for timezones + 6h for DIA; 40h = 28h for 4am + 12h for timezones
-    query="find%5Bcreated_at%5D%5B%24gte%5D=`date --date="$i -18 hours" -Iminutes`&find%5Bcreated_at%5D%5B%24lte%5D=`date --date="$i +42 hours" -Iminutes`"
+    query="find%5Bcreated_at%5D%5B%24gte%5D=`date --date="$i -19 hours" -Iminutes`&find%5Bcreated_at%5D%5B%24lte%5D=`date --date="$i +43 hours" -Iminutes`"
     echo Query: $NIGHTSCOUT_HOST treatments.json $query
     ns-get host $NIGHTSCOUT_HOST treatments.json $query > ns-treatments.$i.json || die "Couldn't download ns-treatments.$i.json"
     ls -la ns-treatments.$i.json || die "No ns-treatments.$i.json downloaded"
@@ -245,8 +250,13 @@ do
     else
         SPLIT_LARGE_MEALS_OPT="--split-large-meals=false"
     fi
-    echo "oref0-autotune-prep $CATEGORIZE_UAM_AS_BASAL_OPT $TUNE_INSULIN_CURVE_OPT $SPLIT_LARGE_MEALS_OPT ns-treatments.$i.json profile.json ns-entries.$i.json profile.pump.json > autotune.$i.json"
-    oref0-autotune-prep $CATEGORIZE_UAM_AS_BASAL_OPT $TUNE_INSULIN_CURVE_OPT $SPLIT_LARGE_MEALS_OPT ns-treatments.$i.json profile.json ns-entries.$i.json profile.pump.json > autotune.$i.json \
+    if [[ $LIMIT_AVGDEV = "0.0" ]]; then
+        LIMIT_AVGDEV=""
+    else
+        LIMIT_AVGDEV="--end-meal-if-avgdev-le=$LIMIT_AVGDEV"
+    fi
+    echo "oref0-autotune-prep $CATEGORIZE_UAM_AS_BASAL_OPT $TUNE_INSULIN_CURVE_OPT $SPLIT_LARGE_MEALS_OPT $LIMIT_AVGDEV ns-treatments.$i.json profile.json ns-entries.$i.json profile.pump.json > autotune.$i.json"
+    oref0-autotune-prep $CATEGORIZE_UAM_AS_BASAL_OPT $TUNE_INSULIN_CURVE_OPT $SPLIT_LARGE_MEALS_OPT $LIMIT_AVGDEV ns-treatments.$i.json profile.json ns-entries.$i.json profile.pump.json > autotune.$i.json \
         || die "Could not run oref0-autotune-prep ns-treatments.$i.json profile.json ns-entries.$i.json"
     
     # Autotune  (required args, <autotune/glucose.json> <autotune/autotune.json> <settings/profile.json>), 
