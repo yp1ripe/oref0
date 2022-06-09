@@ -193,10 +193,12 @@ def ns_to_oaps(ns_profile):
     oaps_profile = {}
     # XXX If addint any new entries, make sure to update PROFILE_KEYS at the top
     # Not represented in nightscout
-    oaps_profile["min_5m_carbimpact"] = 8.0
+    oaps_profile["min_5m_carbimpact"] = 3.0
     oaps_profile["autosens_min"] = 0.7
     oaps_profile["autosens_max"] = 1.2
     oaps_profile["dia"] = float(ns_profile["dia"])
+    oaps_profile["curve"] = "rapid-acting"
+    oaps_profile["useCustomPeakTime"] = "false"
     oaps_profile["timezone"] = ns_profile["timezone"]
 
     # Create a list of dicts with basal profile
