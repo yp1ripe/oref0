@@ -51,6 +51,7 @@ TERMINAL_LOGGING=true
 CATEGORIZE_UAM_AS_BASAL=false
 SPLIT_LARGE_MEALS=true
 LIMIT_AVGDEV=0.0
+FAST_DECAY=true
 TUNE_INSULIN_CURVE=false
 RECOMMENDS_REPORT=true
 UNKNOWN_OPTION=""
@@ -127,6 +128,10 @@ case $i in
     ;;
     -m=*|--end-meal-if-avgdev-le=*)
     LIMIT_AVGDEV="${i#*=}"
+    shift
+    ;;
+    -y=*|--fast-decay-le15g-carbs=*)
+    FAST_DECAY="${i#*=}"
     shift
     ;;
     -i=*|--tune-insulin-curve=*)
@@ -255,8 +260,13 @@ do
     else
         LIMIT_AVGDEV="--end-meal-if-avgdev-le=$LIMIT_AVGDEV"
     fi
-    echo "oref0-autotune-prep $CATEGORIZE_UAM_AS_BASAL_OPT $TUNE_INSULIN_CURVE_OPT $SPLIT_LARGE_MEALS_OPT $LIMIT_AVGDEV ns-treatments.$i.json profile.json ns-entries.$i.json profile.pump.json > autotune.$i.json"
-    oref0-autotune-prep $CATEGORIZE_UAM_AS_BASAL_OPT $TUNE_INSULIN_CURVE_OPT $SPLIT_LARGE_MEALS_OPT $LIMIT_AVGDEV ns-treatments.$i.json profile.json ns-entries.$i.json profile.pump.json > autotune.$i.json \
+    if [[ $FAST_DECAY = "true" ]]; then
+        FAST_DECAY=""
+    else
+        FAST_DECAY="--fast-decay-le15g-carbs=$FAST_DECAY"
+    fi
+    echo "oref0-autotune-prep $CATEGORIZE_UAM_AS_BASAL_OPT $TUNE_INSULIN_CURVE_OPT $SPLIT_LARGE_MEALS_OPT $LIMIT_AVGDEV $FAST_DECAY ns-treatments.$i.json profile.json ns-entries.$i.json profile.pump.json > autotune.$i.json"
+    oref0-autotune-prep $CATEGORIZE_UAM_AS_BASAL_OPT $TUNE_INSULIN_CURVE_OPT $SPLIT_LARGE_MEALS_OPT $LIMIT_AVGDEV $FAST_DECAY ns-treatments.$i.json profile.json ns-entries.$i.json profile.pump.json > autotune.$i.json \
         || die "Could not run oref0-autotune-prep ns-treatments.$i.json profile.json ns-entries.$i.json"
     
     # Autotune  (required args, <autotune/glucose.json> <autotune/autotune.json> <settings/profile.json>), 

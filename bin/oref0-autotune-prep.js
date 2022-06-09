@@ -27,7 +27,7 @@ var moment = require('moment');
 if (!module.parent) {
 
     var argv = require('yargs')
-        .usage("$0 <pumphistory.json> <profile.json> <glucose.json> <pumpprofile.json> [<carbhistory.json>] [--categorize_uam_as_basal] [--tune-insulin-curve] [--split-large-meals] [--end-meal-if-avgdev-le][--output-file=<output_file.json>]")
+        .usage("$0 <pumphistory.json> <profile.json> <glucose.json> <pumpprofile.json> [<carbhistory.json>] [--categorize_uam_as_basal] [--tune-insulin-curve] [--split-large-meals] [--end-meal-if-avgdev-le=<float>][--output-file=<output_file.json>]")
         .option('categorize_uam_as_basal', {
             alias: 'u',
             boolean: true,
@@ -51,6 +51,12 @@ if (!module.parent) {
             boolean: false,
             describe: 'End meal absorption if avgdev less or equivalent than, default 0.0',
             default: '0.0',
+        })
+        .option('fast-decay-le15g-carbs', {
+            alias: 'y',
+            boolean: true,
+            describe: 'Fast decay of the small(<15g) carb portions (most likely fast carbs) when there are still COB',
+            default: true,
         })
         .option('output-file', {
             alias: 'o',
@@ -144,6 +150,7 @@ if (!module.parent) {
     , tune_insulin_curve: params['tune-insulin-curve']
     , split_large_meals: params['split-large-meals']
     , end_meal_if_avgdev_le: params['end-meal-if-avgdev-le']
+    , fast_decay_le15g_carbs: params['fast-decay-le15g-carbs']
     };
 
     var prepped_glucose = generate(inputs);
