@@ -213,6 +213,7 @@ fi
 
 cp profile.json settings/
 cp profile.json pumpprofile.json
+cp profile.json settings/autotune.json
 cp pumpprofile.json settings/
 
 if [[ -e $as_override ]]; then
