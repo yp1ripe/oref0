@@ -177,6 +177,7 @@ else
     if [ -z "$2" ]; then noise=10; fi
     carbs=$3
     if [ -z "$3" ]; then carbs=0; fi
+    cat clock.json
     echo Running oref-simulator with deviation $deviation, noise $noise, and carbs $carbs in dir $DIR
     main
     stats
