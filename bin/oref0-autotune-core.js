@@ -30,6 +30,17 @@ if (!module.parent) {
           describe: 'File to write output',
           default: null,
         })
+        .option('round-basals-to', {
+          alias: 'r',
+          describe: 'round basals to 1/N',
+          default: 1000,
+        })
+        .option('compress-basal-profile', {
+          alias: 'z',
+          boolean: true,
+          describe: 'only output a line to the basal profile if the rate actually changes',
+          default: false,
+        })
         .demand(3)
         .strict(true)
         .help('help');
@@ -66,6 +77,7 @@ if (!module.parent) {
         preppedGlucose: prepped_glucose_data
       , previousAutotune: previous_autotune_data
       , pumpProfile: pumpprofile_data
+      , params: params
     };
 
     var autotune_output = autotune(inputs);
