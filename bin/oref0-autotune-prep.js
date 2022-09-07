@@ -58,6 +58,12 @@ if (!module.parent) {
             describe: 'Fast decay of the small(<15g) carb portions (most likely fast carbs) when there are still COB',
             default: true,
         })
+        .option('dosed-bolus-only', {
+            alias: 'b',
+            boolean: true,
+            describe: 'For IC(CR) ratio calculations only account for bolus insulin dosed within meal bounds',
+            default: false,
+        })
         .option('output-file', {
             alias: 'o',
             describe: 'Output file to write output',
@@ -151,6 +157,7 @@ if (!module.parent) {
     , split_large_meals: params['split-large-meals']
     , end_meal_if_avgdev_le: params['end-meal-if-avgdev-le']
     , fast_decay_le15g_carbs: params['fast-decay-le15g-carbs']
+    , dosed_bolus_only: params['dosed-bolus-only']
     };
 
     var prepped_glucose = generate(inputs);
