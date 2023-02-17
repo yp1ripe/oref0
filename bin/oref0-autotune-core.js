@@ -40,6 +40,11 @@ if (!module.parent) {
           describe: 'an analogue "Deliver this percentage of bolus wizard result" in AAPS',
           default: null,
         })
+        .option('new-vals-weight', {
+          alias: 'g',
+          describe: 'new_isf*XX/100 - old_isf*(100-XX)/100',
+          default: 20,
+        })
         .option('compress-basal-profile', {
           alias: 'z',
           boolean: true,

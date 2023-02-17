@@ -54,6 +54,7 @@ SPLIT_LARGE_MEALS=true
 LIMIT_AVGDEV=0.0
 FAST_DECAY=true
 WIZARD_PERCENT=""
+NEW_VALS_WEIGHT=""
 ROUND_BASALS_TO=""
 COMPRESS_BASAL_PROFILE=""
 TUNE_INSULIN_CURVE=false
@@ -157,6 +158,10 @@ case $i in
     ;;
     -i=*|--tune-insulin-curve=*)
     TUNE_INSULIN_CURVE="${i#*=}"
+    shift
+    ;;
+    -g=*|--new-vals-weight=*)
+    NEW_VALS_WEIGHT="--new-vals-weight=${i#*=}"
     shift
     ;;
     *)
@@ -317,9 +322,9 @@ do
     # Autotune  (required args, <autotune/glucose.json> <autotune/autotune.json> <settings/profile.json>), 
     # output autotuned profile or what will be used as <autotune/autotune.json> in the next iteration
     echo "oref0-autotune-core autotune.$i.json profile.json profile.pump.json " \
-        "$ROUND_BASALS_KEY $COMPRESS_BASAL_PROF $WIZARD_PERCENT > newprofile.$i.json"
+        "$ROUND_BASALS_KEY $COMPRESS_BASAL_PROF $WIZARD_PERCENT $NEW_VALS_WEIGHT > newprofile.$i.json"
     if ! oref0-autotune-core autotune.$i.json profile.json profile.pump.json \
-         $ROUND_BASALS_KEY $COMPRESS_BASAL_PROF $WIZARD_PERCENT \
+         $ROUND_BASALS_KEY $COMPRESS_BASAL_PROF $WIZARD_PERCENT $NEW_VALS_WEIGHT \
           > newprofile.$i.json; then
         if cat profile.json | jq --exit-status .carb_ratio==null; then
             echo "ERROR: profile.json contains null carb_ratio: using profile.pump.json"
