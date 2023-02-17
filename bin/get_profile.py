@@ -116,7 +116,7 @@ def profiles(nightscout, token):
         print("\t" + profile)
 
 
-def display(nightscout, token, profile_name, profile_format):
+def display(nightscout, token, profile_name, profile_format, minimpact):
     """
     Display contents of a profile, in requested format
     """
@@ -128,7 +128,7 @@ def display(nightscout, token, profile_name, profile_format):
     elif profile_format == "text":
         display_text(profile)
     else:
-        print(json.dumps(ns_to_oaps(profile), indent=4))
+        print(json.dumps(ns_to_oaps(profile,minimpact), indent=4))
 
 
 def write(nightscout, token, profile_name, directory):
@@ -186,14 +186,14 @@ def normalize_entry(entry):
     return entry
 
 
-def ns_to_oaps(ns_profile):
+def ns_to_oaps(ns_profile,minimpact = 8.0):
     """
     Convert nightscout profile to OpenAPS format
     """
     oaps_profile = {}
     # XXX If addint any new entries, make sure to update PROFILE_KEYS at the top
     # Not represented in nightscout
-    oaps_profile["min_5m_carbimpact"] = 8.0
+    oaps_profile["min_5m_carbimpact"] = minimpact 
     oaps_profile["autosens_min"] = 0.7
     oaps_profile["autosens_max"] = 1.2
     oaps_profile["dia"] = float(ns_profile["dia"])
@@ -416,6 +416,14 @@ if __name__ == "__main__":
         dest="profile_format",
         choices=["nightscout", "openaps", "text"],
         help="What format to display profile in",
+    )
+    parser_display.add_argument(
+        "--minimpact",
+        default=8.0,
+        nargs="?",
+        dest="minimpact",
+        help="min_5m_carbimpact value",
+	type=float
     )
 
     parser_write = subparsers.add_parser(
