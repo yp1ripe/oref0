@@ -53,6 +53,7 @@ DOSED_BOLUS_ONLY=false
 SPLIT_LARGE_MEALS=true
 LIMIT_AVGDEV=0.0
 FAST_DECAY=true
+WIZARD_PERCENT=""
 ROUND_BASALS_TO=""
 COMPRESS_BASAL_PROFILE=""
 TUNE_INSULIN_CURVE=false
@@ -145,9 +146,13 @@ case $i in
     FAST_DECAY="${i#*=}"
     shift
     ;;
+    -w=*|--wizard-percent=*)
+    WIZARD_PERCENT="${i#*=}"
+    shift
+    ;;
     -z=*|--compress-basal-profile=*)
     COMPRESS_BASAL_PROFILE="${i#*=}"
-    echo "+++ $COMPRESS_BASAL_PROFILE +++"
+    #echo "+++ $COMPRESS_BASAL_PROFILE +++"
     shift
     ;;
     -i=*|--tune-insulin-curve=*)
@@ -233,8 +238,9 @@ echo "Grabbing NIGHTSCOUT treatments.json and entries/sgv.json for date range...
 # Get Nightscout BG (sgv.json) Entries
 for i in "${date_list[@]}"
 do 
+    DIA=`jq '.dia' profile.pump.json`
     # pull CGM data from 4am-4am
-    query="find%5Bdate%5D%5B%24gte%5D=$(to_epochtime "$i +4 hours +40 minutes" |nonl; echo 000)&find%5Bdate%5D%5B%24lte%5D=$(to_epochtime "$i +29 hours" |nonl; echo 000)&count=1500"
+    query="find%5Bdate%5D%5B%24gte%5D=$(to_epochtime "$i +5 hours -20 minutes" |nonl; echo 000)&find%5Bdate%5D%5B%24lte%5D=$(to_epochtime "$i +29 hours" |nonl; echo 000)&count=1500"
     echo Query: $NIGHTSCOUT_HOST entries/sgv.json $query
     ns-get host $NIGHTSCOUT_HOST entries/sgv.json $query > ns-entries.$i.json || die "Couldn't download ns-entries.$i.json"
     ls -la ns-entries.$i.json || die "No ns-entries.$i.json downloaded"
@@ -244,7 +250,7 @@ do
     #query="find%5Bdate%5D%5B%24gte%5D=$(to_epochtime $i |nonl; echo 000)&find%5Bdate%5D%5B%24lte%5D=$(to_epochtime "$i +1 days" |nonl; echo 000)&count=1000"
     # to capture UTC-dated treatments, we need to capture an extra 12h on either side, plus the DIA lookback
     # 18h = 12h for timezones + 6h for DIA; 40h = 28h for 4am + 12h for timezones
-    query="find%5Bcreated_at%5D%5B%24gte%5D=`date --date="$i -19 hours" -Iminutes`&find%5Bcreated_at%5D%5B%24lte%5D=`date --date="$i +43 hours" -Iminutes`"
+    query="find%5Bcreated_at%5D%5B%24gte%5D=`date --date="$i +5 hours -$DIA hours" -Iminutes`&find%5Bcreated_at%5D%5B%24lte%5D=`date --date="$i +24 hours +5 hours" -Iminutes`"
     echo Query: $NIGHTSCOUT_HOST treatments.json $query
     ns-get host $NIGHTSCOUT_HOST treatments.json $query > ns-treatments.$i.json || die "Couldn't download ns-treatments.$i.json"
     ls -la ns-treatments.$i.json || die "No ns-treatments.$i.json downloaded"
@@ -281,6 +287,9 @@ do
     else
         FAST_DECAY="--fast-decay-le15g-carbs=$FAST_DECAY"
     fi
+    if [[ -n "$WIZARD_PERCENT" ]]; then
+        WIZARD_PERCENT="--wizard-percent=$WIZARD_PERCENT"
+    fi
     if [[ -n "$ROUND_BASALS_TO" ]] && [[ $i = ${date_list[@]: -1} ]]; then
         ROUND_BASALS_KEY="--round-basals-to=$ROUND_BASALS_TO"
     else 
@@ -307,8 +316,10 @@ do
     
     # Autotune  (required args, <autotune/glucose.json> <autotune/autotune.json> <settings/profile.json>), 
     # output autotuned profile or what will be used as <autotune/autotune.json> in the next iteration
-    echo "oref0-autotune-core autotune.$i.json profile.json profile.pump.json $ROUND_BASALS_KEY $COMPRESS_BASAL_PROF > newprofile.$i.json"
-    if ! oref0-autotune-core autotune.$i.json profile.json profile.pump.json $ROUND_BASALS_KEY $COMPRESS_BASAL_PROF \
+    echo "oref0-autotune-core autotune.$i.json profile.json profile.pump.json " \
+        "$ROUND_BASALS_KEY $COMPRESS_BASAL_PROF $WIZARD_PERCENT > newprofile.$i.json"
+    if ! oref0-autotune-core autotune.$i.json profile.json profile.pump.json \
+         $ROUND_BASALS_KEY $COMPRESS_BASAL_PROF $WIZARD_PERCENT \
           > newprofile.$i.json; then
         if cat profile.json | jq --exit-status .carb_ratio==null; then
             echo "ERROR: profile.json contains null carb_ratio: using profile.pump.json"

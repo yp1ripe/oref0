@@ -35,6 +35,11 @@ if (!module.parent) {
           describe: 'round basals to 1/N',
           default: 1000,
         })
+        .option('wizard-percent', {
+          alias: 'w',
+          describe: 'an analogue "Deliver this percentage of bolus wizard result" in AAPS',
+          default: null,
+        })
         .option('compress-basal-profile', {
           alias: 'z',
           boolean: true,
