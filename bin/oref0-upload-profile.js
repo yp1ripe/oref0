@@ -160,7 +160,7 @@ if (!module.parent) {
                 // Set the conversion factor according to the units wanted
                 // 0.055 = divide by 18 (convert mg/dL to mmol/L)
                 // 18 = multiply by 18 (convert mmol/L to mg/dL)
-                conversionFactor = (new_profile.units == 'mmol' ? 0.055 : 18);
+                conversionFactor = (new_profile.units == 'mmol' ? 0.0555 : 18.018018);
             }
 
             low_value *= conversionFactor;
@@ -226,6 +226,10 @@ if (!module.parent) {
 
         var new_carb_ratios = [];
         var decimals = 10; // always round insulin to carb ratios to 0.1g
+        if(profiledata["carb_ratio"] && profiledata.carb_ratios.schedule[0]) {
+            profiledata.carb_ratios.schedule[0].ratio = profiledata["carb_ratio"];
+            //console.error("carb_ratio!!!");
+        }
 
         _.forEach(profiledata.carb_ratios.schedule, function(carb_entry) {
 
