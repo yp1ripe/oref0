@@ -148,7 +148,7 @@ case $i in
     shift
     ;;
     -w=*|--wizard-percent=*)
-    WIZARD_PERCENT="${i#*=}"
+    WIZARD_PERCENT="--wizard-percent=${i#*=}"
     shift
     ;;
     -z=*|--compress-basal-profile=*)
@@ -292,9 +292,9 @@ do
     else
         FAST_DECAY="--fast-decay-le15g-carbs=$FAST_DECAY"
     fi
-    if [[ -n "$WIZARD_PERCENT" ]]; then
-        WIZARD_PERCENT="--wizard-percent=$WIZARD_PERCENT"
-    fi
+#    if [[ -n "$WIZARD_PERCENT" ]]; then
+#        WIZARD_PERCENT="--wizard-percent="
+#    fi
     if [[ -n "$ROUND_BASALS_TO" ]] && [[ $i = ${date_list[@]: -1} ]]; then
         ROUND_BASALS_KEY="--round-basals-to=$ROUND_BASALS_TO"
     else 
