@@ -64,6 +64,11 @@ if (!module.parent) {
             describe: 'For IC(CR) ratio calculations only account for bolus insulin dosed within meal bounds',
             default: false,
         })
+        .option('delay-absorption', {
+            boolean: true,
+            describe: 'delay carbs decay for up to 20 minutes right after start of the meal',
+            default: false,
+        })
         .option('output-file', {
             alias: 'o',
             describe: 'Output file to write output',
@@ -158,6 +163,7 @@ if (!module.parent) {
     , end_meal_if_avgdev_le: params['end-meal-if-avgdev-le']
     , fast_decay_le15g_carbs: params['fast-decay-le15g-carbs']
     , dosed_bolus_only: params['dosed-bolus-only']
+    , delay_meal_absorption: params['delay-absorption']
     };
 
     var prepped_glucose = generate(inputs);
