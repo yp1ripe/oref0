@@ -58,6 +58,7 @@ DELAY_ABSORPTION=""
 NEW_VALS_WEIGHT=""
 ROUND_BASALS_TO=""
 COMPRESS_BASAL_PROFILE=""
+DBG_OUTPUT=""
 TUNE_INSULIN_CURVE=false
 RECOMMENDS_REPORT=true
 UNKNOWN_OPTION=""
@@ -82,7 +83,7 @@ fi
 for i in "$@"
 do
 case $i in
-    -d=*|--dir=*)
+    --dir=*)
     DIR="${i#*=}"
     # ~/ paths have to be expanded manually
     DIR="${DIR/#\~/$HOME}"
@@ -94,13 +95,20 @@ case $i in
     fi
     shift # past argument=value
     ;;
-    -n=*|--ns-host=*)
-    NIGHTSCOUT_HOST="${i#*=}"
-    shift # past argument=value
+    --delay-absorption=*)
+    DELAY_ABSORPTION="--delay-absorption=${i#*=}"
+    shift
     ;;
-    -s=*|--start-date=*)
-    START_DATE="${i#*=}"
-    START_DATE=`date --date="$START_DATE" +%Y-%m-%d`
+    -b=*|--dosed-bolus-only=*)
+    DOSED_BOLUS_ONLY="${i#*=}"
+    shift
+    ;;
+    -c=*|--categorize-uam-as-basal=*)
+    CATEGORIZE_UAM_AS_BASAL="${i#*=}"
+    shift
+    ;;
+    -d=*|--end-days-ago=*)
+    END_DAYS_AGO="${i#*=}"
     shift # past argument=value
     ;;
     -e=*|--end-date=*)
@@ -108,37 +116,34 @@ case $i in
     END_DATE=`date --date="$END_DATE" +%Y-%m-%d`
     shift # past argument=value
     ;;
-    -t=*|--start-days-ago=*)
-    START_DAYS_AGO="${i#*=}"
-    shift # past argument=value
+    -g=*|--new-vals-weight=*)
+    NEW_VALS_WEIGHT="--new-vals-weight=${i#*=}"
+    shift
     ;;
-    -d=*|--end-days-ago=*)
-    END_DAYS_AGO="${i#*=}"
-    shift # past argument=value
-    ;;
-    -x=*|--xlsx=*)
-    EXPORT_EXCEL="${i#*=}"
-    shift # past argument=value
+    -i=*|--tune-insulin-curve=*)
+    TUNE_INSULIN_CURVE="${i#*=}"
+    shift
     ;;
     -l=*|--log=*)
     TERMINAL_LOGGING="${i#*=}"
     shift
     ;;
-    -c=*|--categorize-uam-as-basal=*)
-    CATEGORIZE_UAM_AS_BASAL="${i#*=}"
-    shift
+    -n=*|--ns-host=*)
+    NIGHTSCOUT_HOST="${i#*=}"
+    shift # past argument=value
     ;;
     -p=*|--split-large-meals=*)
     SPLIT_LARGE_MEALS="${i#*=}"
     shift
     ;;
-    -b=*|--dosed-bolus-only=*)
-    DOSED_BOLUS_ONLY="${i#*=}"
-    shift
+    -s=*|--start-date=*)
+    START_DATE="${i#*=}"
+    START_DATE=`date --date="$START_DATE" +%Y-%m-%d`
+    shift # past argument=value
     ;;
-    --delay-absorption=*)
-    DELAY_ABSORPTION="--delay-absorption=${i#*=}"
-    shift
+    -t=*|--start-days-ago=*)
+    START_DAYS_AGO="${i#*=}"
+    shift # past argument=value
     ;;
     -m=*|--end-meal-if-avgdev-le=*)
     LIMIT_AVGDEV="${i#*=}"
@@ -148,25 +153,25 @@ case $i in
     ROUND_BASALS_TO="${i#*=}"
     shift
     ;;
-    -y=*|--fast-decay-le15g-carbs=*)
-    FAST_DECAY="${i#*=}"
+    -v=*|--debug-output=*)
+    DBG_OUTPUT="--dbg-output=${i#*=}"
     shift
     ;;
     -w=*|--wizard-percent=*)
     WIZARD_PERCENT="--wizard-percent=${i#*=}"
     shift
     ;;
+    -x=*|--xlsx=*)
+    EXPORT_EXCEL="${i#*=}"
+    shift # past argument=value
+    ;;
+    -y=*|--fast-decay-le15g-carbs=*)
+    FAST_DECAY="${i#*=}"
+    shift
+    ;;
     -z=*|--compress-basal-profile=*)
     COMPRESS_BASAL_PROFILE="${i#*=}"
     #echo "+++ $COMPRESS_BASAL_PROFILE +++"
-    shift
-    ;;
-    -i=*|--tune-insulin-curve=*)
-    TUNE_INSULIN_CURVE="${i#*=}"
-    shift
-    ;;
-    -g=*|--new-vals-weight=*)
-    NEW_VALS_WEIGHT="--new-vals-weight=${i#*=}"
     shift
     ;;
     *)
@@ -318,11 +323,11 @@ do
 
     echo "oref0-autotune-prep "\
             "$CATEGORIZE_UAM_AS_BASAL_OPT $TUNE_INSULIN_CURVE_OPT $SPLIT_LARGE_MEALS_OPT "\
-            "$LIMIT_AVGDEV $FAST_DECAY $DOSED_BO_OPT $DELAY_ABSORPTION"\
+            "$LIMIT_AVGDEV $FAST_DECAY $DOSED_BO_OPT $DELAY_ABSORPTION $DBG_OUTPUT"\
             "ns-treatments.$i.json profile.json ns-entries.$i.json profile.pump.json > autotune.$i.json"
     #echo "oref0-autotune-prep $CATEGORIZE_UAM_AS_BASAL_OPT $TUNE_INSULIN_CURVE_OPT $SPLIT_LARGE_MEALS_OPT $LIMIT_AVGDEV $FAST_DECAY $DOSED_BO_OPT ns-treatments.$i.json profile.json ns-entries.$i.json profile.pump.json > autotune.$i.json"
     oref0-autotune-prep $CATEGORIZE_UAM_AS_BASAL_OPT $TUNE_INSULIN_CURVE_OPT $SPLIT_LARGE_MEALS_OPT \
-         $LIMIT_AVGDEV $FAST_DECAY $DOSED_BO_OPT $DELAY_ABSORPTION \
+         $LIMIT_AVGDEV $FAST_DECAY $DOSED_BO_OPT $DELAY_ABSORPTION $DBG_OUTPUT\
          ns-treatments.$i.json profile.json ns-entries.$i.json profile.pump.json > autotune.$i.json \
         || die "Could not run oref0-autotune-prep ns-treatments.$i.json profile.json ns-entries.$i.json"
     

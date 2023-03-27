@@ -69,6 +69,11 @@ if (!module.parent) {
             describe: 'delay carbs decay for up to 20 minutes right after start of the meal',
             default: false,
         })
+        .option('dbg-output', {
+            boolean: false,
+            describe: 'debugging output bits',
+            default: 0,
+        })
         .option('output-file', {
             alias: 'o',
             describe: 'Output file to write output',
@@ -164,6 +169,7 @@ if (!module.parent) {
     , fast_decay_le15g_carbs: params['fast-decay-le15g-carbs']
     , dosed_bolus_only: params['dosed-bolus-only']
     , delay_meal_absorption: params['delay-absorption']
+    , dbg_output: params['dbg-output']
     };
 
     var prepped_glucose = generate(inputs);
