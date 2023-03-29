@@ -59,6 +59,7 @@ NEW_VALS_WEIGHT=""
 ROUND_BASALS_TO=""
 COMPRESS_BASAL_PROFILE=""
 DBG_OUTPUT=""
+SPLIT30=""
 TUNE_INSULIN_CURVE=false
 RECOMMENDS_REPORT=true
 UNKNOWN_OPTION=""
@@ -97,6 +98,10 @@ case $i in
     ;;
     --delay-absorption=*)
     DELAY_ABSORPTION="--delay-absorption=${i#*=}"
+    shift
+    ;;
+    --split30=*)
+    SPLIT30="--split30=${i#*=}"
     shift
     ;;
     -b=*|--dosed-bolus-only=*)
@@ -323,11 +328,11 @@ do
 
     echo "oref0-autotune-prep "\
             "$CATEGORIZE_UAM_AS_BASAL_OPT $TUNE_INSULIN_CURVE_OPT $SPLIT_LARGE_MEALS_OPT "\
-            "$LIMIT_AVGDEV $FAST_DECAY $DOSED_BO_OPT $DELAY_ABSORPTION $DBG_OUTPUT"\
+            "$LIMIT_AVGDEV $FAST_DECAY $DOSED_BO_OPT $DELAY_ABSORPTION $DBG_OUTPUT $SPLIT30" \
             "ns-treatments.$i.json profile.json ns-entries.$i.json profile.pump.json > autotune.$i.json"
     #echo "oref0-autotune-prep $CATEGORIZE_UAM_AS_BASAL_OPT $TUNE_INSULIN_CURVE_OPT $SPLIT_LARGE_MEALS_OPT $LIMIT_AVGDEV $FAST_DECAY $DOSED_BO_OPT ns-treatments.$i.json profile.json ns-entries.$i.json profile.pump.json > autotune.$i.json"
     oref0-autotune-prep $CATEGORIZE_UAM_AS_BASAL_OPT $TUNE_INSULIN_CURVE_OPT $SPLIT_LARGE_MEALS_OPT \
-         $LIMIT_AVGDEV $FAST_DECAY $DOSED_BO_OPT $DELAY_ABSORPTION $DBG_OUTPUT\
+         $LIMIT_AVGDEV $FAST_DECAY $DOSED_BO_OPT $DELAY_ABSORPTION $DBG_OUTPUT $SPLIT30\
          ns-treatments.$i.json profile.json ns-entries.$i.json profile.pump.json > autotune.$i.json \
         || die "Could not run oref0-autotune-prep ns-treatments.$i.json profile.json ns-entries.$i.json"
     

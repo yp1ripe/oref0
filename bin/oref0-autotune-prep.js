@@ -74,6 +74,11 @@ if (!module.parent) {
             describe: 'debugging output bits',
             default: 0,
         })
+        .option('split30', {
+            boolean: true,
+            describe: 'perform old-style basal interval splitting in no more than 30m spans',
+            default: false,
+        })
         .option('output-file', {
             alias: 'o',
             describe: 'Output file to write output',
@@ -170,6 +175,7 @@ if (!module.parent) {
     , dosed_bolus_only: params['dosed-bolus-only']
     , delay_meal_absorption: params['delay-absorption']
     , dbg_output: params['dbg-output']
+    , split30: params['split30']
     };
 
     var prepped_glucose = generate(inputs);
