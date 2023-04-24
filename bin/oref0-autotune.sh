@@ -297,12 +297,12 @@ do
     else
         SPLIT_LARGE_MEALS_OPT="--split-large-meals=false"
     fi
-    if [[ $LIMIT_AVGDEV = "0.0" ]]; then
+    if [[ $LIMIT_AVGDEV = "0.0" || -z $LIMIT_AVGDEV ]]; then
         LIMIT_AVGDEV=""
     else
         LIMIT_AVGDEV="--end-meal-if-avgdev-le=$LIMIT_AVGDEV"
     fi
-    if [[ $FAST_DECAY = "true" ]]; then
+    if [[ $FAST_DECAY = "true" || -z $FAST_DECAY ]]; then
         FAST_DECAY=""
     else
         FAST_DECAY="--fast-decay-le15g-carbs=$FAST_DECAY"
