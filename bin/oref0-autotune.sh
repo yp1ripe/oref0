@@ -264,7 +264,7 @@ echo "Grabbing NIGHTSCOUT treatments.json and entries/sgv.json for date range...
 for i in "${date_list[@]}"
 do 
     DIA=`jq '.dia' profile.pump.json`
-    DIA=$(( $DIA > $CPRH ? $DIA : $CPRH ))
+    DIA=$(( $CPRH > 0 ? $DIA+$CPRH : $DIA ))
     echo DIA=$DIA
     # pull CGM data from 4am-4am
     query="find%5Bdate%5D%5B%24gte%5D=$(to_epochtime "$i +5 hours -${CPRH} hours -20 minutes" |nonl; echo 000)&find%5Bdate%5D%5B%24lte%5D=$(to_epochtime "$i +29 hours" |nonl; echo 000)&count=1500"
