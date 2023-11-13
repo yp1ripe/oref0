@@ -52,6 +52,12 @@ if (!module.parent) {
             describe: 'End meal absorption if avgdev less or equivalent than, default 0.0',
             default: '0.0',
         })
+        .option('limit-carbs-decay-time', {
+            alias: 'p',
+            boolean: true,
+            describe: 'End meal if it tooks more time than absorption of 10g carbs per hour',
+            default: true,
+        })
         .option('fast-decay-le15g-carbs', {
             alias: 'y',
             boolean: true,
@@ -171,6 +177,7 @@ if (!module.parent) {
     , tune_insulin_curve: params['tune-insulin-curve']
     , split_large_meals: params['split-large-meals']
     , end_meal_if_avgdev_le: params['end-meal-if-avgdev-le']
+    , limit_carbs_decay_time: params['limit-carbs-decay-time']
     , fast_decay_le15g_carbs: params['fast-decay-le15g-carbs']
     , dosed_bolus_only: params['dosed-bolus-only']
     , delay_meal_absorption: params['delay-absorption']
