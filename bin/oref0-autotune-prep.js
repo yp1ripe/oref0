@@ -53,10 +53,9 @@ if (!module.parent) {
             default: '0.0',
         })
         .option('limit-carbs-decay-time', {
-            alias: 'p',
             boolean: true,
             describe: 'End meal if it tooks more time than absorption of 10g carbs per hour',
-            default: true,
+            default: false,
         })
         .option('fast-decay-le15g-carbs', {
             alias: 'y',
