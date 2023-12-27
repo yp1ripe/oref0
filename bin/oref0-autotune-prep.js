@@ -74,6 +74,11 @@ if (!module.parent) {
             describe: 'delay carbs decay for up to 20 minutes right after start of the meal',
             default: false,
         })
+        .option('combined-isf-basal-logic', {
+            boolean: true,
+            describe: 'deviations both affect ISF and basals',
+            default: true,
+        })
         .option('dbg-output', {
             boolean: false,
             describe: 'debugging output bits',
@@ -180,6 +185,7 @@ if (!module.parent) {
     , fast_decay_le15g_carbs: params['fast-decay-le15g-carbs']
     , dosed_bolus_only: params['dosed-bolus-only']
     , delay_meal_absorption: params['delay-absorption']
+    , combined_isf_basal: params['combined-isf-basal-logic']
     , dbg_output: params['dbg-output']
     , split30: params['split30']
     };
