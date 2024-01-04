@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Module to ease work with nightscout profiles.
 By default lists all profiles found, and supports following sub-commands:
