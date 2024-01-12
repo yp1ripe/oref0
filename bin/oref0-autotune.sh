@@ -66,6 +66,8 @@ TUNE_INSULIN_CURVE=false
 RECOMMENDS_REPORT=true
 UNKNOWN_OPTION=""
 CPRH=0
+CPRM=0
+CPSH=0
 
 if [ -n "${API_SECRET_READ}" ]; then 
    echo "WARNING: API_SECRET_READ is deprecated starting with oref 0.6.x. The Nightscout authentication information is now used from the API_SECRET environment variable"
@@ -117,6 +119,14 @@ case $i in
     ;;
     --carb-pre-offset-hours=*)
     CPRH="${i#*=}"
+    shift
+    ;;
+    --carb-pre-offset-minutes=*)
+    CPRM="${i#*=}"
+    shift
+    ;;
+    --carb-post-offset-hours=*)
+    CPSH="${i#*=}"
     shift
     ;;
     -b=*|--dosed-bolus-only=*)
@@ -277,7 +287,7 @@ do
     DIA=$(( $CPRH > 0 ? $DIA+$CPRH : $DIA ))
     echo DIA=$DIA
     # pull CGM data from 4am-4am
-    query="find%5Bdate%5D%5B%24gte%5D=$(to_epochtime "$i +5 hours -${CPRH} hours -20 minutes" |nonl; echo 000)&find%5Bdate%5D%5B%24lte%5D=$(to_epochtime "$i +29 hours" |nonl; echo 000)&count=1500"
+    query="find%5Bdate%5D%5B%24gte%5D=$(to_epochtime "$i +5 hours -${CPRH} hours -20 minutes -${CPRM} minutes" |nonl; echo 000)&find%5Bdate%5D%5B%24lte%5D=$(to_epochtime "$i +29 hours +${CPSH} hours" |nonl; echo 000)&count=1500"
     echo Query: $NIGHTSCOUT_HOST entries/sgv.json $query
     ns-get host $NIGHTSCOUT_HOST entries/sgv.json $query > ns-entries.$i.json || die "Couldn't download ns-entries.$i.json"
     ls -la ns-entries.$i.json || die "No ns-entries.$i.json downloaded"
