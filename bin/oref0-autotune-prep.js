@@ -84,6 +84,12 @@ if (!module.parent) {
             describe: 'debugging output bits',
             default: 0,
         })
+        .option('detect-PISA', {
+            alias: 'P',
+            boolean: true,
+            describe: 'wheter to try to detect Pressure-Induced Sensor Attenuation events and mark corresponding ISF and basal records as invalid',
+            default: true,
+        })
         .option('split30', {
             boolean: true,
             describe: 'perform old-style basal interval splitting in no more than 30m spans',
@@ -187,6 +193,7 @@ if (!module.parent) {
     , delay_meal_absorption: params['delay-absorption']
     , combined_isf_basal: params['combined-isf-basal-logic']
     , dbg_output: params['dbg-output']
+    , detect_PISA: params['detect-PISA']
     , split30: params['split30']
     };
 
