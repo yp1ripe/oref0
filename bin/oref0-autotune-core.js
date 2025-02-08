@@ -51,6 +51,11 @@ if (!module.parent) {
           describe: 'only output a line to the basal profile if the rate actually changes',
           default: false,
         })
+        .option('strict-24h-meals', {
+          boolean: false,
+          describe: 'only include meals for 24h starting at midnight',
+          default: false,
+        })
 	.option('dbg-output', {
             boolean: false,
             describe: 'debugging output bits',

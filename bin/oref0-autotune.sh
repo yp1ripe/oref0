@@ -66,6 +66,7 @@ TUNE_INSULIN_CURVE=false
 RECOMMENDS_REPORT=true
 DETECT_PISA=true
 DETECT_PISA_OPT=""
+STRICT_MEALS=""
 UNKNOWN_OPTION=""
 CPRH=0
 CPRM=0
@@ -129,6 +130,11 @@ case $i in
     ;;
     --carb-post-offset-hours=*)
     CPSH="${i#*=}"
+    shift
+    ;;
+    --strict-24h-meals=*)
+    STRICT_MEALS=$i
+    echo $STRICT_MEALS
     shift
     ;;
     -b=*|--dosed-bolus-only=*)
@@ -380,9 +386,9 @@ do
     # Autotune  (required args, <autotune/glucose.json> <autotune/autotune.json> <settings/profile.json>), 
     # output autotuned profile or what will be used as <autotune/autotune.json> in the next iteration
     echo "oref0-autotune-core autotune.$i.json profile.json profile.pump.json " \
-        "$ROUND_BASALS_KEY $COMPRESS_BASAL_PROF $WIZARD_PERCENT $NEW_VALS_WEIGHT $DBG_OUTPUT > newprofile.$i.json"
+        "$ROUND_BASALS_KEY $COMPRESS_BASAL_PROF $WIZARD_PERCENT $NEW_VALS_WEIGHT $DBG_OUTPUT $STRICT_MEALS > newprofile.$i.json"
     if ! oref0-autotune-core autotune.$i.json profile.json profile.pump.json \
-         $ROUND_BASALS_KEY $COMPRESS_BASAL_PROF $WIZARD_PERCENT $NEW_VALS_WEIGHT $DBG_OUTPUT \
+         $ROUND_BASALS_KEY $COMPRESS_BASAL_PROF $WIZARD_PERCENT $NEW_VALS_WEIGHT $DBG_OUTPUT $STRICT_MEALS \
           > newprofile.$i.json; then
         if cat profile.json | jq --exit-status .carb_ratio==null; then
             echo "ERROR: profile.json contains null carb_ratio: using profile.pump.json"
