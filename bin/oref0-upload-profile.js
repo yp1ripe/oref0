@@ -26,7 +26,7 @@ var _ = require('lodash');
 if (!module.parent) {
 
     var argv = require('yargs')
-        .usage("$0 profile.json NSURL api-secret [--preview] [--switch]")
+        .usage("$0 profile.json NSURL api-secret [--preview] [--switch] [--roundto] [--compress]")
         .option('preview', {
             alias: 'p'
             , describe: "Give a preview of the outcome without uploading"
@@ -35,6 +35,18 @@ if (!module.parent) {
         .option('switch', {
             default: false
             , describe: "Issue Profile Switch event to enable this profile"
+        })
+        .option('compress', {
+	    alias: 'z'
+	    , type: 'boolean'
+            , describe: "Issue Profile Switch event to enable this profile"
+            , default: false
+        })
+        .option('roundto', {
+            alias: 'r'
+	    , boolean: false
+            , describe: "Issue Profile Switch event to enable this profile"
+            , default: 100
         })
         .strict(true)
         .help('help');
@@ -125,6 +137,10 @@ if (!module.parent) {
 
         var new_basal = [];
         var decimals = 100; // always round basal rates to 0.01 U/h
+	if( params.roundto <= 1000 && params.roundto >= 10 ) {
+	    decimals = params.roundto;
+	    console.error('decimals',decimals);
+	}
 
         _.forEach(profiledata.basalprofile, function(basalentry) {
 
@@ -137,6 +153,19 @@ if (!module.parent) {
             new_basal.push(newEntry);
 
         });
+
+
+        if( params.compress ) {
+	    console.error("compress is in effect");
+            var hour=1;
+            for (hour=1; hour < new_basal.length; hour++) {
+                if( +new_basal[hour].value == +new_basal[hour-1].value ) {
+                    new_basal.splice(hour,1);
+                    hour--;
+                }
+            }
+	    //console.error(new_basal);
+        }
 
         profile_store.basal = new_basal;
 
@@ -160,7 +189,7 @@ if (!module.parent) {
                 // Set the conversion factor according to the units wanted
                 // 0.055 = divide by 18 (convert mg/dL to mmol/L)
                 // 18 = multiply by 18 (convert mmol/L to mg/dL)
-                conversionFactor = (new_profile.units == 'mmol' ? 0.0555 : 18.018018);
+                conversionFactor = (new_profile.units == 'mmol' ? 0.0555 : 18.018018018);
             }
 
             low_value *= conversionFactor;
@@ -205,7 +234,7 @@ if (!module.parent) {
                 // Set the conversion factor according to the units wanted
                 // 0.055 = divide by 18 (convert mg/dL to mmol/L)
                 // 18 = multiply by 18 (convert mmol/L to mg/dL)
-                conversionFactor = (new_profile.units == 'mmol' ? 0.055 : 18);
+                conversionFactor = (new_profile.units == 'mmol' ? 0.0555 : 18.018018);
             }
 
             value *= conversionFactor;
