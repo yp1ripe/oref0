@@ -71,6 +71,7 @@ UNKNOWN_OPTION=""
 CPRH=0
 CPRM=0
 CPSH=0
+LEGACY_PUMP_PROFILE_FILE_BEHAVIOR=false
 
 if [ -n "${API_SECRET_READ}" ]; then 
    echo "WARNING: API_SECRET_READ is deprecated starting with oref 0.6.x. The Nightscout authentication information is now used from the API_SECRET environment variable"
@@ -110,6 +111,10 @@ case $i in
     ;;
     --combined-isf-basal-logic=*)
     COMBINED_ISF="--combined-isf-basal-logic=${i#*=}"
+    shift
+    ;;
+    --legacy-pump-profile-behavior)
+    LEGACY_PUMP_PROFILE_FILE_BEHAVIOR=true
     shift
     ;;
     --limit-carbs-decay-time=*)
@@ -295,6 +300,26 @@ echo "Grabbing NIGHTSCOUT treatments.json and entries/sgv.json for date range...
 # Get Nightscout BG (sgv.json) Entries
 for i in "${date_list[@]}"
 do 
+    if [[ $LEGACY_PUMP_PROFILE_FILE_BEHAVIOR = "false" ]]; then
+	# if there's a stored pump profile ( $directory/settings/profile.$date.json )  use it instead of current one
+        altdate=$(date --date=$i  +%y%m%d)
+        echo $i  $altdate
+        if [ -r $directory/settings/profile.$i.json ]; then
+            cp $directory/settings/profile.$i.json $directory/settings/profile.json
+            cp $directory/settings/profile.$i.json $directory/settings/pumpprofile.json
+            cp $directory/settings/profile.$i.json $directory/autotune/profile.pump.json
+            if [ ! -r $directory/autotune/profile.json ]; then
+                 cp $directory/settings/profile.$i.json $directory/autotune/profile.json
+            fi
+        elif [ -r $directory/settings/profile.$altdate.json ]; then
+            cp $directory/settings/profile.$altdate.json $directory/settings/profile.json
+            cp $directory/settings/profile.$altdate.json $directory/settings/pumpprofile.json
+            cp $directory/settings/profile.$altdate.json $directory/autotune/profile.pump.json
+            if [ ! -r $directory/autotune/profile.json ]; then
+                 cp $directory/settings/profile.$altdate.json $directory/autotune/profile.json
+            fi
+        fi
+    fi
     DIA=`jq '.dia' profile.pump.json`
     #DIA=$(( $CPRH > 0 ? $DIA+$CPRH : $DIA ))
     echo DIA=$DIA
