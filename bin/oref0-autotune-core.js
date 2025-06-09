@@ -52,7 +52,7 @@ if (!module.parent) {
           default: false,
         })
         .option('strict-24h-meals', {
-          boolean: false,
+          boolean: true,
           describe: 'only include meals for 24h starting at midnight',
           default: false,
         })
